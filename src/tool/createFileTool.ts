@@ -3,6 +3,7 @@ import path from "path";
 import { z } from "zod";
 
 import type { ToolDef, ToolHandler } from "./types.js";
+import { decodeHtmlEntities, shouldDecodeHtml } from "./contentUtils.js";
 import { resolveWorkspacePath } from "./pathUtils.js";
 import { withObservation } from "./withObservation.js";
 
@@ -40,8 +41,13 @@ export const createFileToolHandler: ToolHandler = withObservation(async (args) =
 
   await fs.mkdir(dirPath, { recursive: true });
 
+  let finalContent = content ?? "";
+  if (finalContent && shouldDecodeHtml(targetPath)) {
+    finalContent = decodeHtmlEntities(finalContent);
+  }
+
   try {
-    await fs.writeFile(targetPath, content ?? "", { flag: "wx" });
+    await fs.writeFile(targetPath, finalContent, { flag: "wx" });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`Failed to create file ${targetPath}: ${message}`);

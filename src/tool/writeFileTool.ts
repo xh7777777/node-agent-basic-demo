@@ -3,6 +3,7 @@ import path from "path";
 import { z } from "zod";
 
 import type { ToolDef, ToolHandler } from "./types.js";
+import { decodeHtmlEntities, shouldDecodeHtml } from "./contentUtils.js";
 import { resolveWorkspacePath } from "./pathUtils.js";
 import { withObservation } from "./withObservation.js";
 
@@ -44,7 +45,13 @@ export const writeFileToolHandler: ToolHandler = withObservation(async (args) =>
   const dirPath = path.dirname(targetPath);
 
   await fs.mkdir(dirPath, { recursive: true });
-  await fs.writeFile(targetPath, content, { flag: append ? "a" : "w" });
 
-  return `Wrote ${content.length} chars to ${targetPath}`;
+  const finalContent =
+    shouldDecodeHtml(targetPath) && content
+      ? decodeHtmlEntities(content)
+      : content;
+
+  await fs.writeFile(targetPath, finalContent, { flag: append ? "a" : "w" });
+
+  return `Wrote ${finalContent.length} chars to ${targetPath}`;
 });
