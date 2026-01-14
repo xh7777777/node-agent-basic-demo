@@ -4,8 +4,6 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 
-const tool_list = "<tool_list_placeholder>";
-
 export function getSystemPrompt(): string {
   const file_path = path.resolve(process.cwd());
   const operating_system = os.type() + " " + os.release();
@@ -53,18 +51,11 @@ export function getSystemPrompt(): string {
 - 如果 <action> 中的某个工具参数有多行的话，请使用 \n 来表示，如：<action>write_to_file("/tmp/test.txt", "a\nb\nc")</action>
 - 工具参数中的文件路径请使用绝对路径，不要只给出一个文件名。比如要写 write_to_file("/tmp/test.txt", "内容")，而不是 write_to_file("test.txt", "内容")
 
-⸻
-
-本次任务可用工具：
-${tool_list}
-
-⸻
-
 环境信息：
 
 操作系统：${operating_system}
 当前目录下文件列表：${file_list}
 当前目录绝对路径：${file_path}
 `;
-  return "";
+  return prompt;
 }
