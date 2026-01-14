@@ -17,6 +17,9 @@ importers:
       dotenv-expand:
         specifier: ^12.0.3
         version: 12.0.3
+      openai:
+        specifier: ^6.16.0
+        version: 6.16.0(zod@4.3.5)
       zod:
         specifier: ^4.3.5
         version: 4.3.5
@@ -358,6 +361,18 @@ packages:
     resolution: {integrity: sha512-ZDY+bPm5zTTF+YpCrAU9nK0UgICYPT0QtT1NZWFv4s++TNkcgVaT0g6+4R2uI4MjQjzysHB1zxuWL50hzaeXiw==}
     engines: {node: '>= 0.6'}
 
+  openai@6.16.0:
+    resolution: {integrity: sha512-fZ1uBqjFUjXzbGc35fFtYKEOxd20kd9fDpFeqWtsOZWiubY8CZ1NAlXHW3iathaFvqmNtCWMIsosCuyeI7Joxg==}
+    hasBin: true
+    peerDependencies:
+      ws: ^8.18.0
+      zod: ^3.25 || ^4.0
+    peerDependenciesMeta:
+      ws:
+        optional: true
+      zod:
+        optional: true
+
   proxy-from-env@1.1.0:
     resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==}
 
@@ -655,6 +670,10 @@ snapshots:
   mime-types@2.1.35:
     dependencies:
       mime-db: 1.52.0
+
+  openai@6.16.0(zod@4.3.5):
+    optionalDependencies:
+      zod: 4.3.5
 
   proxy-from-env@1.1.0: {}
 

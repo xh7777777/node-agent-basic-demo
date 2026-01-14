@@ -6,3 +6,64 @@
  * - Normalize responses into `{ role, content, id }` objects that the ReAct loop can store verbatim.
  * - Keep this file free of CLI or tool logic; it's strictly the network boundary.
  */
+
+// Please install OpenAI SDK first: `npm install openai`
+import env from "@/utils/loadEnv.js";
+import { getSystemPrompt } from "@/prompt/systemPrompt.js";
+import type { NormalizedChatMessage } from "@/agent/types.js";
+import type {
+  ChatCompletionMessageParam,
+  ChatCompletionTool,
+} from "openai/resources/chat/completions.js";
+
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  baseURL: env.DEEPSEEK_API_BASE,
+  apiKey: env.DEEPSEEK_API_KEY,
+});
+
+type DeepseekClientOptions = {
+  model?: string;
+};
+
+type DeepseekChatParams = {
+  messages: ChatCompletionMessageParam[];
+  temperature?: number;
+  tools?: ChatCompletionTool[];
+};
+
+export default class DeepseekClient {
+  private model: string;
+
+  constructor(options: DeepseekClientOptions = {}) {
+    this.model = options.model ?? "deepseek-chat";
+  }
+
+  public async chat(params: DeepseekChatParams): Promise<NormalizedChatMessage> {
+    const systemPrompt = getSystemPrompt();
+    const allMessages: DeepseekChatParams["messages"] = [
+      { role: "system", content: systemPrompt },
+      ...params.messages,
+    ];
+
+    const response = await openai.chat.completions.create({
+      model: this.model,
+      messages: allMessages,
+      temperature: params.temperature,
+      tools: params.tools,
+      stream: false,
+    });
+
+    const message = response.choices[0]?.message;
+    if (!message) {
+      throw new Error("DeepSeek response missing message content.");
+    }
+
+    return {
+      id: response.id,
+      role: "assistant",
+      content: message.content ?? "",
+    };
+  }
+}
