@@ -8,4 +8,51 @@
  * 6. Exit with code 0 on success and a non-zero code (plus helpful error message) on failure.
  */
 import env from "@/utils/loadEnv.js";
-console.log("Loaded environment variables:", env);
+import DeepseekClient from "@/agent/DeepseekClient.js";
+import { createToolHandler } from "@/tool/index.js";
+import type { ChatCompletionMessageParam } from "openai/resources/chat/completions.js";
+
+const question = "现在是几点";
+
+const run = async () => {
+  console.log("Loaded environment variables:", env);
+
+  const client = new DeepseekClient();
+  const toolHandler = createToolHandler();
+  const tools = toolHandler.listTools();
+
+  const messages: ChatCompletionMessageParam[] = [
+    { role: "user", content: question },
+  ];
+
+  for (let turn = 0; turn < 5; turn += 1) {
+    const response = await client.chat({ messages, tools });
+    console.log("Received response from DeepSeek API.", response);
+    const { message } = response;
+    messages.push(message);
+
+    const toolCalls = message.tool_calls ?? [];
+    if (toolCalls.length === 0) {
+      console.log("Assistant:", message.content ?? "");
+      return;
+    }
+
+    for (const call of toolCalls) {
+      const result = await toolHandler.executeToolCall(call);
+      const content =
+        typeof result === "string" ? result : JSON.stringify(result);
+      messages.push({
+        role: "tool",
+        tool_call_id: call.id,
+        content,
+      });
+    }
+  }
+
+  throw new Error("Too many tool-calling turns without a final answer.");
+};
+
+run().catch((error) => {
+  console.error("Run failed:", error);
+  process.exitCode = 1;
+});

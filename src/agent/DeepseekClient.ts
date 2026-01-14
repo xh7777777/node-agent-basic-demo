@@ -10,8 +10,8 @@
 // Please install OpenAI SDK first: `npm install openai`
 import env from "@/utils/loadEnv.js";
 import { getSystemPrompt } from "@/prompt/systemPrompt.js";
-import type { NormalizedChatMessage } from "@/agent/types.js";
 import type {
+  ChatCompletionMessage,
   ChatCompletionMessageParam,
   ChatCompletionTool,
 } from "openai/resources/chat/completions.js";
@@ -33,6 +33,11 @@ type DeepseekChatParams = {
   tools?: ChatCompletionTool[];
 };
 
+type DeepseekChatResult = {
+  id: string;
+  message: ChatCompletionMessage;
+};
+
 export default class DeepseekClient {
   private model: string;
 
@@ -40,7 +45,7 @@ export default class DeepseekClient {
     this.model = options.model ?? "deepseek-chat";
   }
 
-  public async chat(params: DeepseekChatParams): Promise<NormalizedChatMessage> {
+  public async chat(params: DeepseekChatParams): Promise<DeepseekChatResult> {
     const systemPrompt = getSystemPrompt();
     const allMessages: DeepseekChatParams["messages"] = [
       { role: "system", content: systemPrompt },
@@ -60,10 +65,6 @@ export default class DeepseekClient {
       throw new Error("DeepSeek response missing message content.");
     }
 
-    return {
-      id: response.id,
-      role: "assistant",
-      content: message.content ?? "",
-    };
+    return { id: response.id, message };
   }
 }
