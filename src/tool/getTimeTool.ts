@@ -15,5 +15,5 @@ export const getTimeTool: ToolDef = {
 
 export const getTimeToolHandler: ToolHandler = async () => {
   console.log("Executing get_current_time tool");
-  return new Date().toISOString();
+  return `<observation>${new Date().toISOString()}</observation>`;
 };

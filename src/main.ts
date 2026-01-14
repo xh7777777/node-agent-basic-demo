@@ -32,7 +32,7 @@ const run = async () => {
     messages.push(message);
 
     const toolCalls = message.tool_calls ?? [];
-    if (toolCalls.length === 0) {
+    if (message.content?.includes("<final_answer>")) {
       console.log("Assistant:", message.content ?? "");
       return;
     }
