@@ -12,7 +12,8 @@ import DeepseekClient from "@/agent/DeepseekClient.js";
 import { createToolHandler } from "@/tool/index.js";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions.js";
 
-const question = "现在是几点";
+const question =
+  "请在项目路径下创建一个snake文件夹，然后分别写css，js和html文件来实现一个贪吃蛇小游戏";
 
 const run = async () => {
   console.log("Loaded environment variables:", env);
@@ -25,7 +26,7 @@ const run = async () => {
     { role: "user", content: question },
   ];
 
-  for (let turn = 0; turn < 5; turn += 1) {
+  for (let turn = 0; turn < 20; turn += 1) {
     const response = await client.chat({ messages, tools });
     console.log("Received response from DeepSeek API.", response);
     const { message } = response;

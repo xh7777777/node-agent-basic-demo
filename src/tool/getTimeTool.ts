@@ -1,4 +1,5 @@
 import type { ToolDef, ToolHandler } from "./types.js";
+import { withObservation } from "./withObservation.js";
 
 export const getTimeTool: ToolDef = {
   type: "function",
@@ -13,7 +14,7 @@ export const getTimeTool: ToolDef = {
   },
 };
 
-export const getTimeToolHandler: ToolHandler = async () => {
+export const getTimeToolHandler: ToolHandler = withObservation(async () => {
   console.log("Executing get_current_time tool");
-  return `<observation>${new Date().toISOString()}</observation>`;
-};
+  return new Date().toISOString();
+});
