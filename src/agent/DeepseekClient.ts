@@ -15,22 +15,19 @@ import type {
   ChatCompletionMessageParam,
   ChatCompletionTool,
 } from "openai/resources/chat/completions.js";
-import pino from "pino";
 import OpenAI from "openai";
-import fs from "fs";
-import path from "path";
+import { createPrettyLogger } from "@/utils/logger.js";
 
-const logDir = path.resolve(process.cwd(), "src/log");
-if (!fs.existsSync(logDir)) {
-  fs.mkdirSync(logDir, { recursive: true });
-  console.log("Created log directory:", logDir);
-} else {
-  console.log("Log directory already exists:", logDir);
-}
-
-const logger = pino(pino.destination(path.join(logDir, "app.log"))).child({
+const logger = createPrettyLogger({
+  filename: "app.log",
   module: "DeepseekClient",
 });
+const payloadLogger = createPrettyLogger({
+  filename: "payload.log",
+  module: "DeepseekClientPayload",
+});
+
+const shouldLogPayload = env.DEEPSEEK_LOG_PAYLOAD === "1";
 
 const openai = new OpenAI({
   baseURL: env.DEEPSEEK_API_BASE,
@@ -68,6 +65,17 @@ export default class DeepseekClient {
       ...params.messages,
     ];
 
+    if (shouldLogPayload) {
+      payloadLogger.info({
+        request: {
+          model: this.model,
+          temperature: params.temperature,
+          tools: params.tools,
+          messages: allMessages,
+        },
+      });
+    }
+
     const response = await openai.chat.completions.create({
       model: this.model,
       messages: allMessages,
@@ -79,6 +87,15 @@ export default class DeepseekClient {
     const message = response.choices[0]?.message;
     if (!message) {
       throw new Error("DeepSeek response missing message content.");
+    }
+
+    if (shouldLogPayload) {
+      payloadLogger.info({
+        response: {
+          id: response.id,
+          message,
+        },
+      });
     }
 
     return { id: response.id, message };

@@ -14,7 +14,7 @@ import type { ChatCompletionMessageParam } from "openai/resources/chat/completio
 
 // const question =
 //   "请在项目路径下创建一个snake文件夹，然后分别写css，js和html文件来实现一个贪吃蛇小游戏";
-const question = "你最多能处理多少个字的输入文本";
+const question = "今天是星期几";
 
 const run = async () => {
   console.log("Loaded environment variables:", env);
