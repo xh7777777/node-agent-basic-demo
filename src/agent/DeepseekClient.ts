@@ -15,12 +15,28 @@ import type {
   ChatCompletionMessageParam,
   ChatCompletionTool,
 } from "openai/resources/chat/completions.js";
-
+import pino from "pino";
 import OpenAI from "openai";
+import fs from "fs";
+import path from "path";
+
+const logDir = path.resolve(process.cwd(), "src/log");
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir, { recursive: true });
+  console.log("Created log directory:", logDir);
+} else {
+  console.log("Log directory already exists:", logDir);
+}
+
+const logger = pino(pino.destination(path.join(logDir, "app.log"))).child({
+  module: "DeepseekClient",
+});
 
 const openai = new OpenAI({
   baseURL: env.DEEPSEEK_API_BASE,
   apiKey: env.DEEPSEEK_API_KEY,
+  logger,
+  logLevel: env.NODE_ENV === "development" ? "debug" : "info",
 });
 
 type DeepseekClientOptions = {
